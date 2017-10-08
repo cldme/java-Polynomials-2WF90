@@ -1,0 +1,6 @@
+# Polynomials and Finite Fields
+# Example Input File
+
+polynomial 1: 2 1 0 4
+polynomial 2: 1 2 1 
+prime modulo: 5

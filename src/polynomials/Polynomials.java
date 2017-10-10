@@ -92,7 +92,10 @@ public class Polynomials {
             System.out.println("ArrayList P2: " + P2);
             
             System.out.println();
-            System.out.println("polyAddition: " + polyAddition(P1, P2));
+            System.out.println("polyAddition: " + polyAddSub(P1, P2, '-'));
+            
+            System.out.println();
+            System.out.println("polyMul: " + polyMul(P1, P2));
             
             // Skip to the next operation that needs to be computed
             i += 3;
@@ -161,35 +164,53 @@ public class Polynomials {
     }
     
     // Function for calculating the sum of two polynomials
-    public static ArrayList<Integer> polyAddition(ArrayList<Integer> X, ArrayList<Integer> Y) {
+    public static ArrayList<Integer> polyAddSub(ArrayList<Integer> X, ArrayList<Integer> Y, char operation) {
         
         // Declare variables to be used by the function
         ArrayList<Integer> A = new ArrayList<>(); 
-        int i, j, x, y;
+        int x, y;
         
-        // Variable to store the index for X
-        i = X.size() - 1;
-        // Variable to store the index for Y
-        j = Y.size() - 1;
-        
-        for(int k = 0; (k < X.size() || k < Y.size()); k++) {
+        for(int i = 0; (i < X.size() || i < Y.size()); i++) {
             
             // Get the coefficients of the two polynomials
-            x = (i >= 0) ? X.get(i) : 0;
-            y = (j >= 0) ? Y.get(j) : 0;
+            x = (i < X.size()) ? X.get(i) : 0;
+            y = (i < Y.size()) ? Y.get(i) : 0;
             
             // Add the sum of the coefficients to the new ArrayList
-            // This will be the result of the function (but in reverse order)
-            A.add(x+y);
-            
-            // Update the two pointers i, j
-            i -= 1;
-            j -= 1;
+            // Or subtract the two coefficients depending on the operation
+            if(operation == '+')
+                A.add(x+y);
+            if(operation == '-')
+                A.add(x-y);
         }
         
-        // Reverse the order of the coefficients in A
-        Collections.reverse(A);
         // Return the result from the function call
         return A;
+    }
+    
+    public static ArrayList<Integer> polyMul(ArrayList<Integer> X, ArrayList<Integer> Y) {
+        
+        int A[] = new int[1000];
+        ArrayList<Integer> R = new ArrayList<>();
+        int newDeg, newCoef, maxDeg = 0;
+        
+        for(int i = 0; i < X.size(); i++) {
+            for(int j = 0; j < Y.size(); j++) {
+                newDeg = i + j;
+                newCoef = X.get(i) * Y.get(j);
+                
+                //A.add(newDeg, A.get(newDeg) + newCoef);
+                A[newDeg] = A[newDeg] + newCoef;
+                
+                if(newDeg > maxDeg) maxDeg = newDeg;
+            }
+        }
+        
+        for(int i = 0; i <= maxDeg; i++) {
+            R.add(i, A[i]);
+        }
+        
+        // Return the result from the function call
+        return R;
     }
 }

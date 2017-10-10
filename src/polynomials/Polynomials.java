@@ -97,6 +97,16 @@ public class Polynomials {
             System.out.println();
             System.out.println("polyMul: " + polyMul(P1, P2));
             
+            System.out.println();
+            // HashMap for storing the quotient and remainder
+            // The name mapDivision can be changed to whatever variable name suits better
+            Map<Integer, ArrayList<Integer>> mapDivision = new HashMap<Integer, ArrayList<Integer>>();
+            // Calculate the long division and store the results inside the hash map
+            mapDivision = longDiv(P1, P2);
+            // Now,the quotient and remainder can be accessed individually
+            System.out.println("longDiv Quotient: " + mapDivision.get(0));
+            System.out.println("longDiv Remainder: " + mapDivision.get(1));
+            
             // Skip to the next operation that needs to be computed
             i += 3;
         }
@@ -163,7 +173,7 @@ public class Polynomials {
         }
     }
     
-    // Function for calculating the sum of two polynomials
+    // Function for calculating the addition / subtraction of two polynomials
     public static ArrayList<Integer> polyAddSub(ArrayList<Integer> X, ArrayList<Integer> Y, char operation) {
         
         // Declare variables to be used by the function
@@ -188,6 +198,7 @@ public class Polynomials {
         return A;
     }
     
+    // Function for calculating the multiplication of two polynomials
     public static ArrayList<Integer> polyMul(ArrayList<Integer> X, ArrayList<Integer> Y) {
         
         int A[] = new int[1000];
@@ -212,5 +223,69 @@ public class Polynomials {
         
         // Return the result from the function call
         return R;
+    }
+    
+    // Function for calculating the long division between two polynomials
+    public static Map<Integer, ArrayList<Integer>> longDiv(ArrayList<Integer> X, ArrayList<Integer> Y) {
+        
+        // HashMap for storing the quotient and remainder
+        Map<Integer, ArrayList<Integer>> A = new HashMap<Integer, ArrayList<Integer>>();
+        // Variables for the quotient and remainder
+        ArrayList<Integer> q = new ArrayList<>();
+        ArrayList<Integer> r = new ArrayList<>();
+        ArrayList<Integer> tempPoly = new ArrayList<>();
+        // Other variables
+        int tempCoef, tempDeg;
+        
+        // Initialize the remainder polynomial with X
+        r = X;
+        
+        // While deg(r) >= deg(Y) run through the while loop
+        while(r.size() - 1 >= Y.size() - 1) {
+            // Store the new leading coefficient in tempCoef
+            tempCoef = leadingCoef(r) / leadingCoef(Y);
+            // Store the new degree in tempDeg
+            tempDeg = r.size() - Y.size();
+            
+            // Make the polynomial X^(deg(r) - deg(Y)) into an ArrayList
+            // We do this to easily work with the functions we already have
+            tempPoly = newPolyDeg(tempDeg, tempCoef);
+            
+            // q = q + lc(r)/lc(Y) * X^(deg(r) - deg(b))
+            q = polyAddSub(q, tempPoly, '+');
+            
+            // r = r - lc(r)/lc(Y) * X^(deg(r) - deg(b)) * Y
+            r = polyAddSub(r, polyMul(tempPoly, Y) , '-');
+            
+            while(r.get(r.size() - 1) == 0) {
+                r.remove(r.size() - 1);
+            }
+        }
+        
+        // Result from this function is saved in the hashMap A
+        A.put(0, q);
+        A.put(1, r);
+        
+        // Return the result from the function call
+        return A;
+    }
+    
+    // Function that return the leading coefficient of a polynomial
+    public static int leadingCoef(ArrayList<Integer> X) {
+        return X.get(X.size() - 1);
+    }
+    
+    // Function return an array list that represents the poly (coef * X^deg)
+    public static ArrayList newPolyDeg(int deg, int coef) {
+        
+        ArrayList<Integer> X = new ArrayList<>();
+        for(int i = 0; i < deg; i++)
+            X.add(0);
+        
+        X.add(coef);
+        
+        // Return the result from the function call
+        // i.e: ArrayList filled with zeros, except the coefficient for X^deg
+        return X;
     }
 }

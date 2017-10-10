@@ -92,7 +92,7 @@ public class Polynomials {
             System.out.println("ArrayList P2: " + P2);
             
             System.out.println();
-            System.out.println("polyAddition: " + polyAddSub(P1, P2, '-'));
+            System.out.println("polyAddition: " + polyAddSub(P1, P2, '+'));
             
             System.out.println();
             System.out.println("polyMul: " + polyMul(P1, P2));

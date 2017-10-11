@@ -107,6 +107,12 @@ public class Polynomials {
             System.out.println("longDiv Quotient: " + mapDivision.get(0));
             System.out.println("longDiv Remainder: " + mapDivision.get(1));
             
+            Map<Integer, ArrayList<Integer>> mapEuclid = new HashMap<Integer, ArrayList<Integer>>();
+            mapEuclid = extendedEuclid(P1, P2);
+            System.out.println();
+            System.out.println("Euclid Extended X: " + mapEuclid.get(0));
+            System.out.println("Euclid Extended Y: " + mapEuclid.get(1));
+            
             // Skip to the next operation that needs to be computed
             i += 3;
         }
@@ -226,6 +232,7 @@ public class Polynomials {
     }
     
     // Function for calculating the long division between two polynomials
+    // RETURNS map with: map.get(0) = quotient and map.get(1) = remainder
     public static Map<Integer, ArrayList<Integer>> longDiv(ArrayList<Integer> X, ArrayList<Integer> Y) {
         
         // HashMap for storing the quotient and remainder
@@ -257,12 +264,11 @@ public class Polynomials {
             // r = r - lc(r)/lc(Y) * X^(deg(r) - deg(b)) * Y
             r = polyAddSub(r, polyMul(tempPoly, Y) , '-');
             
-            while(r.get(r.size() - 1) == 0) {
-                r.remove(r.size() - 1);
-            }
+            // Remove trailing zeros from the array
+            r = removeTrailingZeros(r);
         }
         
-        // Result from this function is saved in the hashMap A
+        // Result from this function is saved in the hashMap
         A.put(0, q);
         A.put(1, r);
         
@@ -289,64 +295,83 @@ public class Polynomials {
         return X;
     }
     
-    public static ArrayList<Integer> polyMod(ArrayList<Integer> X,int x){
+    public static ArrayList removeTrailingZeros(ArrayList<Integer> X) {
         
-        for(int coefficient:X){
-            coefficient = coefficient%x;
+        // Remove trailing zeros from the array list
+        while(X.size() > 0 && X.get(X.size() - 1) == 0) {
+            if(X.get(X.size() - 1) == 0)
+               X.remove(X.size() - 1);
         }
+        
+        // Return the result from the function call
         return X;
-        
     }
     
-    public static ArrayList<Integer> euclid(ArrayList<Integer> A, ArrayList<Integer> B){
+    public static Map<Integer, ArrayList<Integer>> extendedEuclid(ArrayList<Integer> A, ArrayList<Integer> B){
         
-        ArrayList<Integer> remainder =  new ArrayList<>();
+        // HashMap for storing the X and Y (returned by Euclid's Algorithm)
+        Map<Integer, ArrayList<Integer>> R = new HashMap<Integer, ArrayList<Integer>>();
+        // Declare the arrays used for the function
+        ArrayList<Integer> x = new ArrayList<>();
+        ArrayList<Integer> y = new ArrayList<>();
+        ArrayList<Integer> x1 = new ArrayList<>();
+        ArrayList<Integer> y1 = new ArrayList<>();
+        ArrayList<Integer> v = new ArrayList<>();
+        ArrayList<Integer> u = new ArrayList<>();
         
-        while(B.get(0)!=0){
-            remainder = longDiv(A,B).get(1);
-            A = (ArrayList<Integer>) B.clone();
-            B = (ArrayList<Integer>) remainder.clone();
-        }
+        // Declare arrays for storing the quotient and remainder after a long division
+        ArrayList<Integer> q = new ArrayList<>();
+        ArrayList<Integer> r = new ArrayList<>();
+        // Declare map for storing the result of the long division
+        Map<Integer, ArrayList<Integer>> div = new HashMap<Integer, ArrayList<Integer>>();
         
-        return A;
-    }
-    
-    public static ArrayList<ArrayList<Integer>> extendedEuclid(ArrayList<Integer> A, ArrayList<Integer> B){
+        // Initialize x, y, v, u
+        x.add(1);
+        y.add(0);
+        v.add(1);
+        u.add(0);
         
-        ArrayList<Integer> x =  new ArrayList<>();
-        ArrayList<Integer> y =  new ArrayList<>();
-        ArrayList<Integer> u =  new ArrayList<>();
-        ArrayList<Integer> v =  new ArrayList<>();
-        ArrayList<Integer> q =  new ArrayList<>();
-        ArrayList<Integer> r =  new ArrayList<>();
-        ArrayList<Integer> x2 =  new ArrayList<>();
-        ArrayList<Integer> y2 =  new ArrayList<>();
-        ArrayList<ArrayList<Integer>> result = new ArrayList<>();
-        while(B.get(0)!=0){
-            q = longDiv(A,B).get(0);
-            r = longDiv(A,B).get(1);
-            A = (ArrayList<Integer>) B.clone();
-            B = (ArrayList<Integer>) r.clone();
-            x2 = (ArrayList<Integer>) x.clone();
-            y2 = (ArrayList<Integer>) y.clone();
-            x = (ArrayList<Integer>) u.clone();
-            y = (ArrayList<Integer>) v.clone();
-            u = polyAddSub(x2,polyMul(q,u),'-');
-            v = polyAddSub(y2,polyMul(q,v),'+');
+        while (B.size() > 0) {
             
+            // Divide the two polynomials
+            div = longDiv(A, B);
+            
+            // Store the quotient in the right variable
+            q = div.get(0);
+            q = removeTrailingZeros(q);
+            
+            // Follow the Extended Euclid algorithm: A = B
+            A = B;
+            
+            // Store the remainder in the right variable
+            B = div.get(1);
+            B = removeTrailingZeros(B);
+            
+            // Store values for x and y
+            x1 = x;
+            y1 = y;
+            
+            // Store new values for x and y
+            x = u;
+            y = v;
+            
+            // Calculate new values for u and v
+            u = polyAddSub(x1, polyMul(q, u), '-');
+            v = polyAddSub(y1, polyMul(q, v), '-');
         }
-        result.add(x);
-        result.add(y);
-        return result;
+        
+        // Result from this function is saved in the hashMap
+        R.put(0, x);
+        R.put(1, y);
+        
+        // Return the result from the function call
+        // The map stores both X and Y (can be accessed by indices 0 and 1)
+        return R;
     }
     
-    public static boolean equalityCheck(ArrayList<Integer> A, ArrayList<Integer> B,ArrayList<Integer> mod,int prime){
-        
-        return polyMod(longDiv(A,mod).get(1),p).equals(polyMod(longDiv(B,mod).get(0),p));
-    }
+    /*
     
     public static ArrayList<Integer> fieldAdd(ArrayList<Integer> A, ArrayList<Integer> B,ArrayList<Integer> mod,int prime){
-        
         ArrayList<Integer> result = new ArrayList<>();
         result = polyAddSub(A,B,'+');
         result = polyMod(result,p);
@@ -356,7 +381,6 @@ public class Polynomials {
     }
     
     public static ArrayList<Integer> fieldMul(ArrayList<Integer> A, ArrayList<Integer> B,ArrayList<Integer> mod,int prime){
-    
         ArrayList<Integer> result = new ArrayList<>();
         result = polyMul(A,B);
         result = polyMod(result,p);
@@ -364,5 +388,6 @@ public class Polynomials {
         //result = fieldDivision(result,mod,p);
         return result;
     }
-    
+
+    */
 }

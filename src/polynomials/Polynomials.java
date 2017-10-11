@@ -288,4 +288,81 @@ public class Polynomials {
         // i.e: ArrayList filled with zeros, except the coefficient for X^deg
         return X;
     }
+    
+    public static ArrayList<Integer> polyMod(ArrayList<Integer> X,int x){
+        
+        for(int coefficient:X){
+            coefficient = coefficient%x;
+        }
+        return X;
+        
+    }
+    
+    public static ArrayList<Integer> euclid(ArrayList<Integer> A, ArrayList<Integer> B){
+        
+        ArrayList<Integer> remainder =  new ArrayList<>();
+        
+        while(B.get(0)!=0){
+            remainder = longDiv(A,B).get(1);
+            A = (ArrayList<Integer>) B.clone();
+            B = (ArrayList<Integer>) remainder.clone();
+        }
+        
+        return A;
+    }
+    
+    public static ArrayList<ArrayList<Integer>> extendedEuclid(ArrayList<Integer> A, ArrayList<Integer> B){
+        
+        ArrayList<Integer> x =  new ArrayList<>();
+        ArrayList<Integer> y =  new ArrayList<>();
+        ArrayList<Integer> u =  new ArrayList<>();
+        ArrayList<Integer> v =  new ArrayList<>();
+        ArrayList<Integer> q =  new ArrayList<>();
+        ArrayList<Integer> r =  new ArrayList<>();
+        ArrayList<Integer> x2 =  new ArrayList<>();
+        ArrayList<Integer> y2 =  new ArrayList<>();
+        ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+        while(B.get(0)!=0){
+            q = longDiv(A,B).get(0);
+            r = longDiv(A,B).get(1);
+            A = (ArrayList<Integer>) B.clone();
+            B = (ArrayList<Integer>) r.clone();
+            x2 = (ArrayList<Integer>) x.clone();
+            y2 = (ArrayList<Integer>) y.clone();
+            x = (ArrayList<Integer>) u.clone();
+            y = (ArrayList<Integer>) v.clone();
+            u = polyAddSub(x2,polyMul(q,u),'-');
+            v = polyAddSub(y2,polyMul(q,v),'+');
+            
+        }
+        result.add(x);
+        result.add(y);
+        return result;
+    }
+    
+    public static boolean equalityCheck(ArrayList<Integer> A, ArrayList<Integer> B,ArrayList<Integer> mod,int prime){
+        
+        return polyMod(longDiv(A,mod).get(1),p).equals(polyMod(longDiv(B,mod).get(0),p));
+    }
+    
+    public static ArrayList<Integer> fieldAdd(ArrayList<Integer> A, ArrayList<Integer> B,ArrayList<Integer> mod,int prime){
+        
+        ArrayList<Integer> result = new ArrayList<>();
+        result = polyAddSub(A,B,'+');
+        result = polyMod(result,p);
+        //to be done
+        //result = fieldDivision(result,mod,p);
+        return result;
+    }
+    
+    public static ArrayList<Integer> fieldMul(ArrayList<Integer> A, ArrayList<Integer> B,ArrayList<Integer> mod,int prime){
+    
+        ArrayList<Integer> result = new ArrayList<>();
+        result = polyMul(A,B);
+        result = polyMod(result,p);
+        //to be done
+        //result = fieldDivision(result,mod,p);
+        return result;
+    }
+    
 }

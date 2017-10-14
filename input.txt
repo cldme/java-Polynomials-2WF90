@@ -1,6 +1,38 @@
 # Polynomials and Finite Fields
 # Example Input File
 
-polynomial 1: 1 2 1
-polynomial 2: 1 1 
-prime modulo: 5
+Polynomial Addition
+[X]: 1 2 1
+[Y]: 1 1
+[P]: 4
+
+Polynomial Subtraction
+[X]: 1 2 1
+[Y]: 1 1
+[P]: 4
+
+Polynomial Multiplication
+[X]: 1 2 1
+[Y]: 1 1
+[P]: 4
+
+Polynomial Division
+[X]: 1 2 1
+[Y]: 1 1
+[P]: 4
+
+Polynomial Scalar Multiple
+[X]: 1 2 1
+[Y]: 1 1
+[P]: 4
+
+Extended Euclidean Algorithm
+[X]: 1 2 1
+[Y]: 1 1
+[P]: 4
+
+Congruent Polynomials
+[X]: 1 2 1
+[Y]: 2 1 1
+[Z]: -1 1
+[P]: 4

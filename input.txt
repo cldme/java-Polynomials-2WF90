@@ -2,37 +2,37 @@
 # Example Input File
 
 Polynomial Addition
+[P]: 7
 [X]: 1 2 1
 [Y]: 1 1
-[P]: 4
 
 Polynomial Subtraction
+[P]: 7
 [X]: 1 2 1
 [Y]: 1 1
-[P]: 4
 
 Polynomial Multiplication
+[P]: 7
 [X]: 1 2 1
 [Y]: 1 1
-[P]: 4
 
 Polynomial Division
+[P]: 7
 [X]: 1 2 1
-[Y]: 1 1
-[P]: 4
+[Y]: 7 4
 
 Polynomial Scalar Multiple
+[P]: 7
 [X]: 1 2 1
 [Y]: 1 1
-[P]: 4
 
 Extended Euclidean Algorithm
+[P]: 7
 [X]: 1 2 1
-[Y]: 1 1
-[P]: 4
+[Y]: 7 4
 
 Congruent Polynomials
+[P]: 7
 [X]: 1 2 1
 [Y]: 2 1 1
 [Z]: -1 1
-[P]: 4

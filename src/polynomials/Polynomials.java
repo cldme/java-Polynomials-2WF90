@@ -48,63 +48,69 @@ public class Polynomials {
             switch(operation) {
                 case "Polynomial Addition":
                     System.out.println("Addition");
-                    P1 = readPolynomial(i+1);
-                    P2 = readPolynomial(i+2);
-                    mod = readModulo(i+3);
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    P2 = readPolynomial(i+3);
                     System.out.println("P1: " + P1);
                     System.out.println("P2: " + P2);
+                    System.out.println("R:  " + polyAddSub(P1, P2, '+'));
                     i += 3;
                     break;
                 case "Polynomial Subtraction":
                     System.out.println("Subtraction");
-                    P1 = readPolynomial(i+1);
-                    P2 = readPolynomial(i+2);
-                    mod = readModulo(i+3);
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    P2 = readPolynomial(i+3);
                     System.out.println("P1: " + P1);
                     System.out.println("P2: " + P2);
+                    System.out.println("R:  " + polyAddSub(P1, P2, '-'));
                     i += 3;
                     break;
                 case "Polynomial Multiplication":
                     System.out.println("Multiplication");
-                    P1 = readPolynomial(i+1);
-                    P2 = readPolynomial(i+2);
-                    mod = readModulo(i+3);
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    P2 = readPolynomial(i+3);
                     System.out.println("P1: " + P1);
                     System.out.println("P2: " + P2);
+                    System.out.println("R:  " + polyMul(P1, P2));
                     i += 3;
                     break;
                 case "Polynomial Division":
                     System.out.println("Division");
-                    P1 = readPolynomial(i+1);
-                    P2 = readPolynomial(i+2);
-                    mod = readModulo(i+3);
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    P2 = readPolynomial(i+3);
                     System.out.println("P1: " + P1);
                     System.out.println("P2: " + P2);
+                    System.out.println("R:  " + polyLongDiv(P1, P2));
                     i += 3;
                     break;
                 case "Polynomial Scalar Multiple":
                     System.out.println("Scalar Multiple");
-                    P1 = readPolynomial(i+1);
-                    P2 = readPolynomial(i+2);
-                    mod = readModulo(i+3);
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    P2 = readPolynomial(i+3);
                     System.out.println("P1: " + P1);
                     System.out.println("P2: " + P2);
+                    // IMPORTANT: Remember to finish this function !!!
                     i += 3;
                     break;
                 case "Extended Euclidean Algorithm":
                     System.out.println("Extended Euclidean Algorithm");
-                    P1 = readPolynomial(i+1);
-                    P2 = readPolynomial(i+2);
-                    mod = readModulo(i+3);
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    P2 = readPolynomial(i+3);
                     System.out.println("P1: " + P1);
                     System.out.println("P2: " + P2);
+                    System.out.println("R:  " + extendedEuclid(P1, P2));
                     i += 3;
                     break;
                 case "Congruent Polynomials":
                     System.out.println("Congruent Polynomials");
-                    P1 = readPolynomial(i+1);
-                    P2 = readPolynomial(i+2);
-                    mod = readModulo(i+4);
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    P2 = readPolynomial(i+3);
                     System.out.println("P1: " + P1);
                     System.out.println("P2: " + P2);
                     i += 4;
@@ -189,6 +195,8 @@ public class Polynomials {
             if(map.get(i).charAt(j) >= '0' && map.get(i).charAt(j) <= '9') {
                 // Convert coefficient from char to int
                 int temp = map.get(i).charAt(j) - '0';
+                // Mod the coefficients by the prime modulo p
+                temp = temp % mod;
                 // Add coefficient to the ArrayList X
                 X.add(temp);
             } else if(map.get(i).charAt(j) == '-') {
@@ -223,7 +231,7 @@ public class Polynomials {
         
         // Declare variables to be used by the function
         ArrayList<Integer> A = new ArrayList<>(); 
-        int x, y;
+        int sum, dif, x, y;
         
         for(int i = 0; (i < X.size() || i < Y.size()); i++) {
             
@@ -231,13 +239,21 @@ public class Polynomials {
             x = (i < X.size()) ? X.get(i) : 0;
             y = (i < Y.size()) ? Y.get(i) : 0;
             
+            sum = (x + y) % mod;
+            dif = (x - y) % mod;
+            
+            if (dif < 0) dif += mod;
+            
             // Add the sum of the coefficients to the new ArrayList
             // Or subtract the two coefficients depending on the operation
             if(operation == '+')
-                A.add(x+y);
+                A.add(sum);
             if(operation == '-')
-                A.add(x-y);
+                A.add(dif);
         }
+        
+        // Remove unused zeros from the end of the array
+        A = removeTrailingZeros(A);
         
         // Return the result from the function call
         return A;
@@ -253,7 +269,7 @@ public class Polynomials {
         for(int i = 0; i < X.size(); i++) {
             for(int j = 0; j < Y.size(); j++) {
                 newDeg = i + j;
-                newCoef = X.get(i) * Y.get(j);
+                newCoef = (X.get(i) * Y.get(j)) % mod;
                 
                 //A.add(newDeg, A.get(newDeg) + newCoef);
                 A[newDeg] = A[newDeg] + newCoef;
@@ -266,13 +282,16 @@ public class Polynomials {
             R.add(i, A[i]);
         }
         
+        // Remove unused zeros from the end of the array
+        R = removeTrailingZeros(R);
+        
         // Return the result from the function call
         return R;
     }
     
     // Function for calculating the long division between two polynomials
     // RETURNS map with: map.get(0) = quotient and map.get(1) = remainder
-    public static Map<Integer, ArrayList<Integer>> longDiv(ArrayList<Integer> X, ArrayList<Integer> Y) {
+    public static Map<Integer, ArrayList<Integer>> polyLongDiv(ArrayList<Integer> X, ArrayList<Integer> Y) {
         
         // HashMap for storing the quotient and remainder
         Map<Integer, ArrayList<Integer>> A = new HashMap<Integer, ArrayList<Integer>>();
@@ -288,15 +307,18 @@ public class Polynomials {
         
         // While deg(r) >= deg(Y) run through the while loop
         while(r.size() - 1 >= Y.size() - 1) {
-            // Store the new leading coefficient in tempCoef
-            tempCoef = leadingCoef(r) / leadingCoef(Y);
+            
             // Store the new degree in tempDeg
             tempDeg = r.size() - Y.size();
             
-            // The resulting coefficient is in Q, long division not possible !?
-            if(tempCoef == 0) {
-                return nullHashMap();
-            }
+            // Store the new leading coefficient in tempCoef
+            if(leadingCoef(r) % leadingCoef(Y) != 0)
+                // Resulting coefficient is an inverse of 
+                // leading coefficient (y) times leading coefficient (r)
+                tempCoef = (getInverse(leadingCoef(Y)) * leadingCoef(r)) % mod;
+            else
+                // leading coefficient is just the division of the two coefficients
+                tempCoef = (leadingCoef(r) / leadingCoef(Y)) % mod;
             
             // Make the polynomial X^(deg(r) - deg(Y)) into an ArrayList
             // We do this to easily work with the functions we already have
@@ -304,10 +326,11 @@ public class Polynomials {
             
             // q = q + lc(r)/lc(Y) * X^(deg(r) - deg(b))
             q = polyAddSub(q, tempPoly, '+');
+            // Remove trailing zeros from the array
+            q = removeTrailingZeros(q);
             
             // r = r - lc(r)/lc(Y) * X^(deg(r) - deg(b)) * Y
             r = polyAddSub(r, polyMul(tempPoly, Y) , '-');
-            
             // Remove trailing zeros from the array
             r = removeTrailingZeros(r);
         }
@@ -320,49 +343,7 @@ public class Polynomials {
         return A;
     }
     
-    // Function that return the leading coefficient of a polynomial
-    public static int leadingCoef(ArrayList<Integer> X) {
-        return X.get(X.size() - 1);
-    }
-    
-    // Function return an array list that represents the poly (coef * X^deg)
-    public static ArrayList newPolyDeg(int deg, int coef) {
-        
-        ArrayList<Integer> X = new ArrayList<>();
-        for(int i = 0; i < deg; i++)
-            X.add(0);
-        
-        X.add(coef);
-        
-        // Return the result from the function call
-        // i.e: ArrayList filled with zeros, except the coefficient for X^deg
-        return X;
-    }
-    
-    public static ArrayList removeTrailingZeros(ArrayList<Integer> X) {
-        
-        // Remove trailing zeros from the array list
-        while(X.size() > 0 && X.get(X.size() - 1) == 0) {
-            if(X.get(X.size() - 1) == 0)
-               X.remove(X.size() - 1);
-        }
-        
-        // Return the result from the function call
-        return X;
-    }
-    
-    // Function that returns the coefficients of a polynomial mod a prime
-    public static ArrayList polyMod(ArrayList<Integer> X, int p) {
-        
-        // Calculate the polynomial modulo a prime
-        for(int i = 0; i < X.size(); i++) {
-            X.set(i, X.get(i) % p);
-        }
-        
-        // Return the result from the function call
-        return X;
-    }
-    
+    // Function runs Extended Euclidean Algorithm
     public static Map<Integer, ArrayList<Integer>> extendedEuclid(ArrayList<Integer> A, ArrayList<Integer> B){
         
         // HashMap for storing the X and Y (returned by Euclid's Algorithm)
@@ -390,23 +371,16 @@ public class Polynomials {
         while (B.size() > 0) {
             
             // Divide the two polynomials
-            div = longDiv(A, B);
+            div = polyLongDiv(A, B);
             
             // Store the quotient in the right variable
             q = div.get(0);
-            q = removeTrailingZeros(q);
             
             // Follow the Extended Euclid algorithm: A = B
             A = B;
             
             // Store the remainder in the right variable
             B = div.get(1);
-            B = removeTrailingZeros(B);
-            
-            // Should div.get(0) = -1 and div.get(1) = -1 then long division failed
-            if(q.get(0) == -1 && B.get(0) == -1) {
-                return nullHashMap();
-            }
             
             // Store values for x and y
             x1 = x;
@@ -429,6 +403,64 @@ public class Polynomials {
         // The map stores both X and Y (can be accessed by indices 0 and 1)
         return R;
     }
+    
+    // Function returns the leading coefficient of a polynomial
+    public static int leadingCoef(ArrayList<Integer> X) {
+        return X.get(X.size() - 1);
+    }
+    
+    // Function returns an array list that represents the poly (coef * X^deg)
+    public static ArrayList newPolyDeg(int deg, int coef) {
+        
+        ArrayList<Integer> X = new ArrayList<>();
+        for(int i = 0; i < deg; i++)
+            X.add(0);
+        
+        X.add(coef);
+        
+        // Return the result from the function call
+        // i.e: ArrayList filled with zeros, except the coefficient for X^deg
+        return X;
+    }
+    
+    // Function returns the inverse of a number (with prime modulo p)
+    public static int getInverse(int x) {
+        // Find the inverse
+        for (int i = 0; i < mod; i++) {
+            if(((x * i) % mod) == 1)
+                // Returns the inverse of x from function call
+                return i;
+        }
+        // Return -1 (should never happen since we always have an inverse)
+        // IMPORTANT: p has to be a prime modulo
+        return -1;
+    }
+    
+    public static ArrayList removeTrailingZeros(ArrayList<Integer> X) {
+        
+        // Remove trailing zeros from the array list
+        while(X.size() > 0 && X.get(X.size() - 1) == 0) {
+            if(X.get(X.size() - 1) == 0)
+               X.remove(X.size() - 1);
+        }
+        
+        // Return the result from the function call
+        return X;
+    }
+    
+    // Function that returns the coefficients of a polynomial mod a prime
+    public static ArrayList polyMod(ArrayList<Integer> X, int p) {
+        
+        // Calculate the polynomial modulo a prime
+        for(int i = 0; i < X.size(); i++) {
+            X.set(i, X.get(i) % p);
+        }
+        
+        // Return the result from the function call
+        return X;
+    }
+    
+    /*
     
     // Function that returns a HashMap with -1,-1
     // Used when long division fails

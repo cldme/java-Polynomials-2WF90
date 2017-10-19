@@ -33,6 +33,8 @@ public class Polynomials {
     public static Map<Integer, ArrayList<Integer>> fieldElementsMap = new HashMap<>();
     // Declare temp polynomial to be used in various caluclations
     public static ArrayList<Integer> tempPoly = new ArrayList<>();
+    // Declare boolean for checking if field was constructed
+    public static boolean hasNoField = true;
     
     // Variable for storing each line of text from the input file
     // Will be using a hash map (line number, string)
@@ -124,12 +126,24 @@ public class Polynomials {
                     mod = readModulo(i+1);
                     P1 = readPolynomial(i+2);
                     System.out.println("Q:  " + P1);
-                    // Call function to generate the field elements
-                    // P1.size()-1 is the deg of the polynomial
-                    // tempPoly is just an empty polynomial of deg P1.size()-1
-                    tempPoly = nullPoly(P1.size()-1);
-                    generateFieldElements(P1.size()-2, tempPoly);
+                    if(hasNoField) constructField();
                     System.out.println("Elements are: " + fieldElementsMap);
+                    i += 2;
+                    break;
+                case "Field Addition Table":
+                    System.out.println("Addition Table");
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    if(hasNoField) constructField();
+                    getAdditionTable();
+                    i += 2;
+                    break;
+                case "Field Multiplication Table":
+                    System.out.println("Multiplication Table");
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    if(hasNoField) constructField();
+                    getMultiplicationTable();
                     i += 2;
                     break;
             }
@@ -438,6 +452,42 @@ public class Polynomials {
         }
     }
     
+    // Function prints to console (maybe to file) the addition table of the field
+    public static void getAdditionTable() {
+        // Declare variable for temp calculations 
+        ArrayList<Integer> tempPoly = new ArrayList<>();
+        // Generate the addition table
+        
+        // Get the number of elements in the field
+        int length = fieldElementsMap.size();
+        
+        for(int i = 0; i < length; i++) {
+            for(int j = 0; j < length; j++) {
+                tempPoly = polyAddSub(fieldElementsMap.get(i), fieldElementsMap.get(j), '+');
+                System.out.print(tempPoly + " ");
+            }
+            System.out.println("");
+        }
+    }
+    
+    // Function prints to console (maybe to file) the multiplication table of the field
+    public static void getMultiplicationTable() {
+        // Declare variable for temp calculations 
+        ArrayList<Integer> tempPoly = new ArrayList<>();
+        // Generate the addition table
+        
+        // Get the number of elements in the field
+        int length = fieldElementsMap.size();
+        
+        for(int i = 0; i < length; i++) {
+            for(int j = 0; j < length; j++) {
+                tempPoly = polyMul(fieldElementsMap.get(i), fieldElementsMap.get(j));
+                System.out.print(tempPoly + " ");
+            }
+            System.out.println("");
+        }
+    }
+    
     // Function returns the leading coefficient of a polynomial
     public static int leadingCoef(ArrayList<Integer> X) {
         return X.get(X.size() - 1);
@@ -478,6 +528,9 @@ public class Polynomials {
                X.remove(X.size() - 1);
         }
         
+        // If X.size() == 0 then add one zero
+        if(X.size() == 0) X.add(0);
+        
         // Return the result from the function call
         return X;
     }
@@ -505,6 +558,20 @@ public class Polynomials {
         
         // Return result from function call
         return tempPoly;
+    }
+    
+    // Function for constructing a field
+    // Only needs to be run once
+    public static void constructField() {
+        // Get the field elements
+        // Call function to generate the field elements
+        // P1.size()-1 is the deg of the polynomial
+        // tempPoly is just an empty polynomial of deg P1.size()-1
+        tempPoly = nullPoly(P1.size()-1);
+        generateFieldElements(P1.size()-2, tempPoly);
+        
+        // We have now generated the field elements
+        hasNoField = false;
     }
     
     /*

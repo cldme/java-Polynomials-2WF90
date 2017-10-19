@@ -2,5 +2,13 @@
 # Example Input File
 
 Generate Field Elements
-[P]: 3
-[Q]: 1 2 0 1
+[P]: 2
+[Q]: 1 1 1
+
+Field Addition Table
+[P]: 2
+[Q]: 1 1 1
+
+Field Multiplication Table
+[P]: 2
+[Q]: 1 1 1

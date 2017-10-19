@@ -29,6 +29,10 @@ public class Polynomials {
     // Array lists for the polynomials
     public static ArrayList<Integer> P1 = new ArrayList<>();
     public static ArrayList<Integer> P2 = new ArrayList<>();
+    // Declare map that stores the field elements
+    public static Map<Integer, ArrayList<Integer>> fieldElementsMap = new HashMap<>();
+    // Declare temp polynomial to be used in various caluclations
+    public static ArrayList<Integer> tempPoly = new ArrayList<>();
     
     // Variable for storing each line of text from the input file
     // Will be using a hash map (line number, string)
@@ -114,6 +118,19 @@ public class Polynomials {
                     System.out.println("P1: " + P1);
                     System.out.println("P2: " + P2);
                     i += 4;
+                    break;
+                case "Generate Field Elements":
+                    System.out.println("Field Elements");
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    System.out.println("Q:  " + P1);
+                    // Call function to generate the field elements
+                    // P1.size()-1 is the deg of the polynomial
+                    // tempPoly is just an empty polynomial of deg P1.size()-1
+                    tempPoly = nullPoly(P1.size()-1);
+                    generateFieldElements(P1.size()-2, tempPoly);
+                    System.out.println("Elements are: " + fieldElementsMap);
+                    i += 2;
                     break;
             }
         }
@@ -294,7 +311,7 @@ public class Polynomials {
     public static Map<Integer, ArrayList<Integer>> polyLongDiv(ArrayList<Integer> X, ArrayList<Integer> Y) {
         
         // HashMap for storing the quotient and remainder
-        Map<Integer, ArrayList<Integer>> A = new HashMap<Integer, ArrayList<Integer>>();
+        Map<Integer, ArrayList<Integer>> A = new HashMap<>();
         // Variables for the quotient and remainder
         ArrayList<Integer> q = new ArrayList<>();
         ArrayList<Integer> r = new ArrayList<>();
@@ -347,7 +364,7 @@ public class Polynomials {
     public static Map<Integer, ArrayList<Integer>> extendedEuclid(ArrayList<Integer> A, ArrayList<Integer> B){
         
         // HashMap for storing the X and Y (returned by Euclid's Algorithm)
-        Map<Integer, ArrayList<Integer>> R = new HashMap<Integer, ArrayList<Integer>>();
+        Map<Integer, ArrayList<Integer>> R = new HashMap<>();
         // Declare the arrays used for the function
         ArrayList<Integer> x = new ArrayList<>();
         ArrayList<Integer> y = new ArrayList<>();
@@ -360,7 +377,7 @@ public class Polynomials {
         ArrayList<Integer> q = new ArrayList<>();
         ArrayList<Integer> r = new ArrayList<>();
         // Declare map for storing the result of the long division
-        Map<Integer, ArrayList<Integer>> div = new HashMap<Integer, ArrayList<Integer>>();
+        Map<Integer, ArrayList<Integer>> div = new HashMap<>();
         
         // Initialize x, y, v, u
         x.add(1);
@@ -402,6 +419,23 @@ public class Polynomials {
         // Return the result from the function call
         // The map stores both X and Y (can be accessed by indices 0 and 1)
         return R;
+    }
+    
+    // Function returns field elements
+    public static void generateFieldElements(int deg, ArrayList<Integer> X) {
+        // Generate field elements
+        if(deg == -1) {
+            ArrayList<Integer> temp = new ArrayList<>();
+            for(int i = 0; i < X.size(); i++) {
+                temp.add(X.get(i));
+            }
+            fieldElementsMap.put(fieldElementsMap.size(), temp);
+        } else {
+            for(int i = 0; i < mod; i++) {
+                X.set(deg, i);
+                generateFieldElements(deg - 1, X);
+            }
+        }
     }
     
     // Function returns the leading coefficient of a polynomial
@@ -460,21 +494,17 @@ public class Polynomials {
         return X;
     }
     
-    /*
-    
-    // Function that returns a HashMap with -1,-1
-    // Used when long division fails
-    public static Map<Integer, ArrayList<Integer>> nullHashMap() {
-        // Declare used variables and arrays
-        Map<Integer, ArrayList<Integer>> NULL = new HashMap<Integer, ArrayList<Integer>>();
+    // Function return a null polynomial of deg n
+    public static ArrayList<Integer> nullPoly(int deg) {
+        // Declare ArrayList to store the polynomial
         ArrayList<Integer> tempPoly = new ArrayList<>();
-        // Configure values that will be returned in case long division fails
-        tempPoly.add(-1);
-        NULL.put(0, tempPoly);
-        NULL.put(1, tempPoly);
         
-        // Return value from function call
-        return NULL;
+        for(int i = 0; i < deg; i++) {
+            tempPoly.add(0);
+        }
+        
+        // Return result from function call
+        return tempPoly;
     }
     
     /*

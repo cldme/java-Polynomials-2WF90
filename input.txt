@@ -12,3 +12,21 @@ Field Addition Table
 Field Multiplication Table
 [P]: 2
 [Q]: 1 1 1
+
+Field Addition
+[P]: 2
+[X]: 1 2
+[Y]: 0 1
+[Q]: 1 1 1
+
+Field Multiplication
+[P]: 2
+[X]: 1 1
+[Y]: 1 1
+[Q]: 1 1 1
+
+Field Quotient
+[P]: 2
+[X]: 1 1
+[Y]: 1 1
+[Q]: 1 1 1

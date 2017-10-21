@@ -29,12 +29,13 @@ public class Polynomials {
     // Array lists for the polynomials
     public static ArrayList<Integer> P1 = new ArrayList<>();
     public static ArrayList<Integer> P2 = new ArrayList<>();
+    public static ArrayList<Integer> Q = new ArrayList<>();
     // Declare map that stores the field elements
     public static Map<Integer, ArrayList<Integer>> fieldElementsMap = new HashMap<>();
     // Declare temp polynomial to be used in various caluclations
     public static ArrayList<Integer> tempPoly = new ArrayList<>();
-    // Declare boolean for checking if field was constructed
-    public static boolean hasNoField = true;
+    // Declare temp map to be used in various calculations
+    public static Map<Integer, ArrayList<Integer>> tempMap = new HashMap<>();
     
     // Variable for storing each line of text from the input file
     // Will be using a hash map (line number, string)
@@ -53,7 +54,7 @@ public class Polynomials {
             
             switch(operation) {
                 case "Polynomial Addition":
-                    System.out.println("Addition");
+                    System.out.println("Polynomial Addition");
                     mod = readModulo(i+1);
                     P1 = readPolynomial(i+2);
                     P2 = readPolynomial(i+3);
@@ -63,7 +64,7 @@ public class Polynomials {
                     i += 3;
                     break;
                 case "Polynomial Subtraction":
-                    System.out.println("Subtraction");
+                    System.out.println("Polynomial Subtraction");
                     mod = readModulo(i+1);
                     P1 = readPolynomial(i+2);
                     P2 = readPolynomial(i+3);
@@ -73,7 +74,7 @@ public class Polynomials {
                     i += 3;
                     break;
                 case "Polynomial Multiplication":
-                    System.out.println("Multiplication");
+                    System.out.println("Polynomial Multiplication");
                     mod = readModulo(i+1);
                     P1 = readPolynomial(i+2);
                     P2 = readPolynomial(i+3);
@@ -83,7 +84,7 @@ public class Polynomials {
                     i += 3;
                     break;
                 case "Polynomial Division":
-                    System.out.println("Division");
+                    System.out.println("Polynomial Division");
                     mod = readModulo(i+1);
                     P1 = readPolynomial(i+2);
                     P2 = readPolynomial(i+3);
@@ -119,32 +120,71 @@ public class Polynomials {
                     P2 = readPolynomial(i+3);
                     System.out.println("P1: " + P1);
                     System.out.println("P2: " + P2);
+                    // IMPORTANT: Remember to finish this function !!!
                     i += 4;
                     break;
                 case "Generate Field Elements":
                     System.out.println("Field Elements");
                     mod = readModulo(i+1);
-                    P1 = readPolynomial(i+2);
-                    System.out.println("Q:  " + P1);
-                    if(hasNoField) constructField();
+                    Q = readPolynomial(i+2);
+                    System.out.println("Q:  " + Q);
+                    constructField(Q);
                     System.out.println("Elements are: " + fieldElementsMap);
                     i += 2;
                     break;
                 case "Field Addition Table":
                     System.out.println("Addition Table");
                     mod = readModulo(i+1);
-                    P1 = readPolynomial(i+2);
-                    if(hasNoField) constructField();
+                    Q = readPolynomial(i+2);
+                    constructField(Q);
                     getAdditionTable();
                     i += 2;
                     break;
                 case "Field Multiplication Table":
                     System.out.println("Multiplication Table");
                     mod = readModulo(i+1);
-                    P1 = readPolynomial(i+2);
-                    if(hasNoField) constructField();
+                    Q = readPolynomial(i+2);
+                    constructField(Q);
                     getMultiplicationTable();
                     i += 2;
+                    break;
+                case "Field Addition":
+                    System.out.println("Field Addition");
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    P2 = readPolynomial(i+3);
+                    Q = readPolynomial(i+4);
+                    //constructField(Q);
+                    tempPoly = polyAddSub(P1, P2, '+');
+                    // Final result has to be divided by Q (working in field)
+                    tempMap = polyLongDiv(tempPoly, Q);
+                    System.out.println("R: " + tempMap.get(1));
+                    break;
+                case "Field Multiplication":
+                    System.out.println("Field Multiplication");
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    P2 = readPolynomial(i+3);
+                    Q = readPolynomial(i+4);
+                    //constructField(Q);
+                    tempPoly = polyMul(P1, P2);
+                    // Final result has to be divided by Q (working in field)
+                    tempMap = polyLongDiv(tempPoly, Q);
+                    System.out.println("R: " + tempMap.get(1));
+                    break;
+                case "Field Quotient":
+                    System.out.println("Field Quotient");
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    P2 = readPolynomial(i+3);
+                    Q = readPolynomial(i+4);
+                    //constructField(Q);
+                    tempMap = extendedEuclid(P2, Q);
+                    System.out.println("b^-1: " + tempMap.get(0));
+                    tempPoly = polyMul(P1, tempMap.get(0));
+                    // Final result has to be divided by Q (working in field)
+                    tempMap = polyLongDiv(tempPoly, Q);
+                    System.out.println("R: " + tempMap.get(1));
                     break;
             }
         }
@@ -227,7 +267,7 @@ public class Polynomials {
                 // Convert coefficient from char to int
                 int temp = map.get(i).charAt(j) - '0';
                 // Mod the coefficients by the prime modulo p
-                temp = temp % mod;
+                temp = digitCheck(temp % mod);
                 // Add coefficient to the ArrayList X
                 X.add(temp);
             } else if(map.get(i).charAt(j) == '-') {
@@ -270,10 +310,8 @@ public class Polynomials {
             x = (i < X.size()) ? X.get(i) : 0;
             y = (i < Y.size()) ? Y.get(i) : 0;
             
-            sum = (x + y) % mod;
-            dif = (x - y) % mod;
-            
-            if (dif < 0) dif += mod;
+            sum = digitCheck((x + y) % mod);
+            dif = digitCheck((x - y) % mod);
             
             // Add the sum of the coefficients to the new ArrayList
             // Or subtract the two coefficients depending on the operation
@@ -300,10 +338,10 @@ public class Polynomials {
         for(int i = 0; i < X.size(); i++) {
             for(int j = 0; j < Y.size(); j++) {
                 newDeg = i + j;
-                newCoef = (X.get(i) * Y.get(j)) % mod;
+                newCoef = digitCheck((X.get(i) * Y.get(j)) % mod);
                 
                 //A.add(newDeg, A.get(newDeg) + newCoef);
-                A[newDeg] = A[newDeg] + newCoef;
+                A[newDeg] = digitCheck((A[newDeg] + newCoef) % mod);
                 
                 if(newDeg > maxDeg) maxDeg = newDeg;
             }
@@ -337,7 +375,7 @@ public class Polynomials {
         r = X;
         
         // While deg(r) >= deg(Y) run through the while loop
-        while(r.size() - 1 >= Y.size() - 1) {
+        while(r.size() - 1 >= Y.size() - 1 && !(r.size() == 1 && r.get(0) == 0)) {
             
             // Store the new degree in tempDeg
             tempDeg = r.size() - Y.size();
@@ -346,10 +384,10 @@ public class Polynomials {
             if(leadingCoef(r) % leadingCoef(Y) != 0)
                 // Resulting coefficient is an inverse of 
                 // leading coefficient (y) times leading coefficient (r)
-                tempCoef = (getInverse(leadingCoef(Y)) * leadingCoef(r)) % mod;
+                tempCoef = digitCheck((getInverse(leadingCoef(Y)) * leadingCoef(r)) % mod);
             else
                 // leading coefficient is just the division of the two coefficients
-                tempCoef = (leadingCoef(r) / leadingCoef(Y)) % mod;
+                tempCoef = digitCheck((leadingCoef(r) / leadingCoef(Y)) % mod);
             
             // Make the polynomial X^(deg(r) - deg(Y)) into an ArrayList
             // We do this to easily work with the functions we already have
@@ -399,7 +437,7 @@ public class Polynomials {
         v.add(1);
         u.add(0);
         
-        while (B.size() > 0) {
+        while (B.size() > 0 && !(B.size() == 1 && B.get(0) == 0)) {
             
             // Divide the two polynomials
             div = polyLongDiv(A, B);
@@ -474,6 +512,7 @@ public class Polynomials {
     public static void getMultiplicationTable() {
         // Declare variable for temp calculations 
         ArrayList<Integer> tempPoly = new ArrayList<>();
+        Map<Integer, ArrayList<Integer>> divisionMap = new HashMap<>();
         // Generate the addition table
         
         // Get the number of elements in the field
@@ -482,7 +521,9 @@ public class Polynomials {
         for(int i = 0; i < length; i++) {
             for(int j = 0; j < length; j++) {
                 tempPoly = polyMul(fieldElementsMap.get(i), fieldElementsMap.get(j));
-                System.out.print(tempPoly + " ");
+                divisionMap = polyLongDiv(tempPoly, Q);
+                // Print the residue of the division (as this is the result)
+                System.out.print(divisionMap.get(1) + " ");
             }
             System.out.println("");
         }
@@ -518,6 +559,17 @@ public class Polynomials {
         // Return -1 (should never happen since we always have an inverse)
         // IMPORTANT: p has to be a prime modulo
         return -1;
+    }
+    
+    // Function that converts -x (mod p) to y (mod p) (so from negative to positive)
+    public static int digitCheck(int x) {
+        // Add the mod while x < 0
+        while(x < 0) {
+            x += mod;
+        }
+        
+        // Return result from function call
+        return x;
     }
     
     public static ArrayList removeTrailingZeros(ArrayList<Integer> X) {
@@ -562,16 +614,17 @@ public class Polynomials {
     
     // Function for constructing a field
     // Only needs to be run once
-    public static void constructField() {
+    public static void constructField(ArrayList<Integer> X) {
         // Get the field elements
-        // Call function to generate the field elements
+        
+        // Initialize the hashmap for the field elements (new hash map)
+        fieldElementsMap.clear();
+        
         // P1.size()-1 is the deg of the polynomial
         // tempPoly is just an empty polynomial of deg P1.size()-1
-        tempPoly = nullPoly(P1.size()-1);
-        generateFieldElements(P1.size()-2, tempPoly);
-        
-        // We have now generated the field elements
-        hasNoField = false;
+        tempPoly = nullPoly(X.size()-1);
+        // Call function to generate the field elements
+        generateFieldElements(X.size()-2, tempPoly);
     }
     
     /*

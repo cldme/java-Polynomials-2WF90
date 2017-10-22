@@ -1,46 +1,6 @@
 # Polynomials and Finite Fields
 # Example Input File
 
-Polynomial Addition
-[P]: 7
-[X]: 1 2 1
-[Y]: 1 1
-
-Polynomial Subtraction
-[P]: 7
-[X]: 1 2 1
-[Y]: 1 1
-
-Polynomial Multiplication
-[P]: 7
-[X]: 1 2 1
-[Y]: 1 1
-
-Polynomial Division
-[P]: 7
-[X]: 1 2 1
-[Y]: 7 4
-
-Polynomial Scalar Multiple
-[P]: 7
-[X]: 1 2 1
-[Y]: 5
-
-Extended Euclidean Algorithm
-[P]: 7
-[X]: 1 2 1
-[Y]: 7 4
-
-Congruent Polynomials
-[P]: 7
-[X]: 1 2 1
-[Y]: 2 1 1
-[Z]: 1 1
-
-Field Tables
-[P]: 3
-[Q]: 1 2 1
-
 Generate Field Elements
 [P]: 3
 [Q]: 1 0 1

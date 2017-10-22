@@ -32,6 +32,8 @@ public class Polynomials {
     public static ArrayList<Integer> Q = new ArrayList<>();
     // Declare map that stores the field elements
     public static Map<Integer, ArrayList<Integer>> fieldElementsMap = new HashMap<>();
+    // Declare array for storing prime divisors
+    public static ArrayList<Integer> divisors = new ArrayList<>();
     // Declare temp polynomial to be used in various caluclations
     public static ArrayList<Integer> tempPoly = new ArrayList<>();
     // Declare temp map to be used in various calculations
@@ -100,7 +102,7 @@ public class Polynomials {
                     P2 = readPolynomial(i+3);
                     System.out.println("P1: " + P1);
                     System.out.println("P2: " + P2);
-                    // IMPORTANT: Remember to finish this function !!!
+                    System.out.println("R:  " + polyMul(P1, P2));
                     i += 3;
                     break;
                 case "Extended Euclidean Algorithm":
@@ -118,9 +120,15 @@ public class Polynomials {
                     mod = readModulo(i+1);
                     P1 = readPolynomial(i+2);
                     P2 = readPolynomial(i+3);
+                    Q = readPolynomial(i+4);
                     System.out.println("P1: " + P1);
                     System.out.println("P2: " + P2);
-                    // IMPORTANT: Remember to finish this function !!!
+                    tempPoly = polyAddSub(P1, P2, '-');
+                    tempMap = polyLongDiv(tempPoly, Q);
+                    if(tempMap.get(1).get(0) == 0 && tempMap.get(1).size() == 1)
+                        System.out.println("R:  polynomials X, Y are congruent mod Z");
+                    else
+                        System.out.println("R:  polynomials X, Y are NOT congruent mod Z");
                     i += 4;
                     break;
                 case "Generate Field Elements":
@@ -185,6 +193,24 @@ public class Polynomials {
                     // Final result has to be divided by Q (working in field)
                     tempMap = polyLongDiv(tempPoly, Q);
                     System.out.println("R: " + tempMap.get(1));
+                    break;
+                case "Check primitivity":
+                    System.out.println("Check primitivity");
+                    mod = readModulo(i+1);
+                    P1 = readPolynomial(i+2);
+                    Q = readPolynomial(i+3);
+                    constructField(Q);
+                    getDivisors(fieldElementsMap.size() - 1);
+                    System.out.println("Prime Divisors: " + divisors + " (q-1 = " + (fieldElementsMap.size() - 1) + ")");
+                    System.out.println("Primitivity Check: " + checkPrimitivity(P1) + " (" + P1 +")");
+                    break;
+                case "Generate Primitive Elements":
+                    System.out.println("Generate Primitve Elements");
+                    mod = readModulo(i+1);
+                    Q = readPolynomial(i+2);
+                    constructField(Q);
+                    getDivisors(fieldElementsMap.size() - 1);
+                    System.out.println("Primitive Elements: " + getPrimitiveElements());
                     break;
             }
         }
@@ -256,6 +282,7 @@ public class Polynomials {
     public static ArrayList<Integer> readPolynomial(int i) {
         
         ArrayList<Integer> X = new ArrayList<>();
+        int temp;
         
         // Variable for detecting polynomial
         String poly1 = map.get(i).substring(1, 2);
@@ -265,7 +292,7 @@ public class Polynomials {
         for(int j = 0; j < map.get(i).length(); j++) {
             if(map.get(i).charAt(j) >= '0' && map.get(i).charAt(j) <= '9') {
                 // Convert coefficient from char to int
-                int temp = map.get(i).charAt(j) - '0';
+                temp = map.get(i).charAt(j) - '0';
                 // Mod the coefficients by the prime modulo p
                 temp = digitCheck(temp % mod);
                 // Add coefficient to the ArrayList X
@@ -273,7 +300,9 @@ public class Polynomials {
             } else if(map.get(i).charAt(j) == '-') {
                 // Skip the minus sign
                 j += 1;
-                int temp = map.get(i).charAt(j) - '0';
+                temp = map.get(i).charAt(j) - '0';
+                temp *= -1;
+                temp = digitCheck(temp % mod);
                 // Add coefficient to the ArrayList X
                 X.add(temp);
             }
@@ -473,6 +502,21 @@ public class Polynomials {
         return R;
     }
     
+    // Function for constructing a field
+    // Only needs to be run once
+    public static void constructField(ArrayList<Integer> X) {
+        // Get the field elements
+        
+        // Initialize the hashmap for the field elements (new hash map)
+        fieldElementsMap.clear();
+        
+        // P1.size()-1 is the deg of the polynomial
+        // tempPoly is just an empty polynomial of deg P1.size()-1
+        tempPoly = nullPoly(X.size()-1);
+        // Call function to generate the field elements
+        generateFieldElements(X.size()-2, tempPoly);
+    }
+    
     // Function returns field elements
     public static void generateFieldElements(int deg, ArrayList<Integer> X) {
         // Generate field elements
@@ -527,6 +571,50 @@ public class Polynomials {
             }
             System.out.println("");
         }
+    }
+    
+    // Function returns whether or not element is primitive (true/false)
+    public static boolean checkPrimitivity(ArrayList<Integer> X) {
+        // Declare working variables
+        ArrayList<Integer> tempPoly = new ArrayList<>();
+        int i = 0, q;
+        // Initialize tempPoly with 1
+        tempPoly.add(1);
+        // Get order of field
+        q = fieldElementsMap.size();
+        q -= 1;
+        
+        for(i = 0; i < divisors.size(); i++) {
+            int pow = q / divisors.get(i);
+            for(int j = 0; j < pow; j++) {
+                // Calculate X^divisors.get(i)
+                tempPoly = polyMul(X, tempPoly);
+                // Working in a field (taking mod Q)
+                tempPoly = polyLongDiv(tempPoly, Q).get(1);
+            }
+            // X is not a primitive element
+            if(tempPoly.size() == 1 && tempPoly.get(0) == 1)
+                return false;
+        }
+        // X is a primitive element
+        return true;
+    }
+    
+    // Function for generating all primitive elements inside a field
+    public static Map<Integer, ArrayList<Integer>> getPrimitiveElements() {
+        // Declare variables to be used inside function
+        Map<Integer, ArrayList<Integer>> tempMap = new HashMap<>();
+        ArrayList<Integer> tempPoly = new ArrayList<>();
+        int j = 0;
+        
+        for(int i = 1; i < fieldElementsMap.size(); i++) {
+            tempPoly = fieldElementsMap.get(i);
+            if(checkPrimitivity(tempPoly)) {
+                tempMap.put(j++, tempPoly);
+            }
+        }
+        
+        return tempMap;
     }
     
     // Function returns the leading coefficient of a polynomial
@@ -612,42 +700,23 @@ public class Polynomials {
         return tempPoly;
     }
     
-    // Function for constructing a field
-    // Only needs to be run once
-    public static void constructField(ArrayList<Integer> X) {
-        // Get the field elements
+    // Function for generating all prime divisors of X
+    public static void getDivisors(int x) {
+        // Calculate all prime divisors of x
+        for(int i = 2; i*i <= x; i++) {
+            if(x % i == 0) {
+                while(x % i == 0) {
+                    x /= i;
+                }
+                divisors.add(i);
+            }
+        }
         
-        // Initialize the hashmap for the field elements (new hash map)
-        fieldElementsMap.clear();
+        if(x != 1)
+            divisors.add(x);
         
-        // P1.size()-1 is the deg of the polynomial
-        // tempPoly is just an empty polynomial of deg P1.size()-1
-        tempPoly = nullPoly(X.size()-1);
-        // Call function to generate the field elements
-        generateFieldElements(X.size()-2, tempPoly);
+        // ArrayList divisors now contains all prime divisors of x
     }
-    
-    /*
-    
-    public static ArrayList<Integer> fieldAdd(ArrayList<Integer> A, ArrayList<Integer> B,ArrayList<Integer> mod,int prime){
-        ArrayList<Integer> result = new ArrayList<>();
-        result = polyAddSub(A,B,'+');
-        result = polyMod(result,p);
-        //to be done
-        //result = fieldDivision(result,mod,p);
-        return result;
-    }
-    
-    public static ArrayList<Integer> fieldMul(ArrayList<Integer> A, ArrayList<Integer> B,ArrayList<Integer> mod,int prime){
-        ArrayList<Integer> result = new ArrayList<>();
-        result = polyMul(A,B);
-        result = polyMod(result,p);
-        //to be done
-        //result = fieldDivision(result,mod,p);
-        return result;
-    }
-
-    */
 }
 
 // Branch in sync with origin/master !
